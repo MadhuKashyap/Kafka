@@ -7,5 +7,16 @@ Here Kafka comes into picture
 <img width="1251" alt="image" src="https://github.com/MadhuKashyap/Kafka/assets/40714383/d4e8fd80-3f0c-466d-9eb2-a8dbd3f5a134">
 All the publishing applications will publish data and receiving applications will consume the data whenever they are avaialable, this way we maintain relatively lesser number of connections between applications
 
+### Important members of kafka
+
+- Producer
+- Consumer
+- Topic
+- Partition
+- Broker
+- Consumer Group
+- Offset
+
+
 
 
