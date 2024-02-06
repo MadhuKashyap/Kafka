@@ -28,5 +28,8 @@ All the publishing applications will publish data and receiving applications wil
 - Just like 1 consumer is associated with 1 partition, 1 consumer group is associated with 1 topic. If group has n consumers, and topic has m partitions where n > m, some consumers will sit idle and read nothing
 
 ### What is a partition key?
+This is used to make consumers read from a particular partition. While calling Kafka.consume(topic, key) we can provide key and topic name to specify the topic and partition from which the consumer will read
 
+### Why do we need to maintain offset in partition?
+It is needed to maintain an index to check what all data has been read by the consumer. Suppose, consumer reads till offset 3 and goes down for some time, after it again becomes active we will have a record of what data has been consumed and what is left
 
