@@ -90,8 +90,14 @@ Each partition:
 - Each partition has replicas on multiple brokers. So even if a broker fails, another broker with a replica can take over.
 
 #### Offset : 
-An offset is a unique identifier for each message within a partition. It acts like a pointer or index, helping Kafka keep track of the position of messages.
-It is needed to maintain an index to check what all data has been read by the consumer. Suppose, consumer reads till offset 3 and goes down for some time, after it again becomes active we will have a record of what data has been consumed and what is left
+- An offset is a unique identifier for each message within a partition. It acts like a pointer or index, helping Kafka keep track of the position of messages.
+- It is needed to maintain an index to check what all data has been read by the consumer. Suppose, consumer reads till offset 3 and goes down for some time, after it again becomes active we will have a record of what data has been consumed and what is left.
+  
+```
+NOTE : Unlike rabbitMQ, messages once read from a partition are not deleted because multiple consumers are allowed to read from a parition.
+Instead of deletion, offsets increase per consumer so that next time they do not read the same message.
+```
+
 
 #### Consumer Group : 
 - A group of consumers working together to read from a topic in parallel.
