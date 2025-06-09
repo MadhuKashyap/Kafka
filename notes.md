@@ -100,10 +100,11 @@ Instead of deletion, offsets increase per consumer so that next time they do not
 
 
 #### Consumer Group : 
-- A group of consumers working together to read from a topic in parallel.
+- A group of consumers working together to read from same topic in parallel.
 - Kafka ensures each partition is only read by one consumer in the group.
 - This allows horizontal scaling of processing.
 - Just like 1 consumer is associated with 1 partition, 1 consumer group is associated with 1 topic.
+- Consumer group is needed to implement parallel processing. Suppose a topic receives 1000 delivery updates per minute for orders and it has only 1 partition. It will be consumed by a single consumer who processes 1 message at a time. This will lead to delay in message processing for older orders. If same task is being done by n consumers, n messages will be processed at the same time.
 
 
 #### Summary
