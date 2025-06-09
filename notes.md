@@ -30,10 +30,21 @@ If you have a Kafka system with 3 servers running, each running Kafka, then you 
 - One broker acts as the MASTER, managing partition leadership and cluster metadata.
 - Kafka uses ZooKeeper (or KRaft in newer versions) to manage broker coordination.
 - The cluster ensures high availability, fault tolerance, and scalability.
-
+- Each cluster has it's own metadata. This metadata contains info like 
+  
 Suppose producer is producing huge volume of data, then a single kafka broker may not be able to handle the load. In that case               we need to add multiple brokers who can consume requests parallely to levarage scalability.
 
 <img width="1204" alt="image" src="https://github.com/user-attachments/assets/b219f408-b4db-4f8a-bb0e-46387832d00b" />
+
+### Cluster Metadata : 
+It refers to Kafka cluster’s current state and configuration. Cluster metadata contains :
+
+- A unique identifier for the Kafka cluster.
+- Broker List: IDs of all the Kafka brokers in the cluster.
+- List of all topics available in the cluster.
+- Number of partitions for each topic.
+- The broker ID that is the leader for each partition. Clients always send writes or reads to the partition leader.
+- The broker acting as the Kafka controller that manages cluster metadata updates, partition assignments, and leader elections.
 
 #### Producer : 
 A Kafka producer is a client that sends (publishes) data to Kafka topics.
@@ -111,12 +122,19 @@ Instead of deletion, offsets increase per consumer so that next time they do not
 #### Zookeeper
 - Kafka is a distributed system with multiple brokers. It needs:
 - A central place to store metadata, like:
-- What topics exist.
-- Where partitions are located.
-- Which broker is the leader for each partition.
-- Coordination between brokers, like:
-- Electing a controller broker.
-- Handling broker failures.
+    - What topics exist.
+    - Where partitions are located.
+    - Which broker is the leader for each partition.
+  Coordination between brokers, like:
+    - Electing a controller broker.
+    - Handling broker failures.
+
+#### KRaft
+- Kafka’s newer architecture (starting from Kafka 2.8+) eliminates the usage of zookeeper for maintaining metadata and broker coordination.
+- A set of brokers form a quorum (called the controller quorum) that collectively manages cluster metadata .
+- This quorum elects a controller leader among themselves to coordinate cluster metadata updates.
+- One broker in this quorum acts as the controller leader to process metadata changes and coordinate the cluster.
+- The quorum ensures high availability and fault tolerance of metadata management — if the current leader fails, another quorum member takes over seamlessly.
 
 #### Summary
 <img width="503" alt="image" src="https://github.com/user-attachments/assets/aee0653c-9e47-468a-b16f-58bd9d5fa0cd" />
