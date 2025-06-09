@@ -48,6 +48,7 @@ producer.send(new ProducerRecord<>(<topic-name>, <partition-key>, <message>));
 ```
 - If the partition-key is provided, Kafka will hash the key and map it to a partition. If no partition-key is provided, Kafka does a round-robin distribution across partitions.
 - A topic can have multiple partitions, and each partition is hosted on a different broker. So messages published to a topic might go to different brokers.
+- Before writing data to a topic, producer requests metadata about the cluster from a broker. The metadata tells on which broker is the partition leader residing and the producer always writes on the leader
 
 
 🧠 Summary
@@ -88,6 +89,7 @@ Each partition:
 - Each partition has 1 consumer out of a consumer group. Suppose there are n partitions of a topic. Each partition contain data of same category. So there will be 1 consumer group consisting of n consumers each reading from a different partition to enable parallel processing.
 - One consumer in the group can consume more than one partition
 - Each partition has replicas on multiple brokers. So even if a broker fails, another broker with a replica can take over.
+- Replicas of a partition follow master slave architecture.n When producer writes message to a partition, the message is written to the replica leader and it's offset is increased. Leader handles all read and write to a topic and followers replicate the leader. 
 
 #### Offset : 
 - An offset is a unique identifier for each message within a partition. It acts like a pointer or index, helping Kafka keep track of the position of messages.
@@ -106,7 +108,23 @@ Instead of deletion, offsets increase per consumer so that next time they do not
 - Just like 1 consumer is associated with 1 partition, 1 consumer group is associated with 1 topic.
 - Consumer group is needed to implement parallel processing. Suppose a topic receives 1000 delivery updates per minute for orders and it has only 1 partition. It will be consumed by a single consumer who processes 1 message at a time. This will lead to delay in message processing for older orders. If same task is being done by n consumers, n messages will be processed at the same time.
 
+#### Zookeeper
+- Kafka is a distributed system with multiple brokers. It needs:
+- A central place to store metadata, like:
+- What topics exist.
+- Where partitions are located.
+- Which broker is the leader for each partition.
+- Coordination between brokers, like:
+- Electing a controller broker.
+- Handling broker failures.
 
 #### Summary
 <img width="503" alt="image" src="https://github.com/user-attachments/assets/aee0653c-9e47-468a-b16f-58bd9d5fa0cd" />
+
+
+### Starting and stoping kafka server
+```
+kafka-server-start ~/desktop/kraft-server.properties
+Ctrl + C
+```
 
