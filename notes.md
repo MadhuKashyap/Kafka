@@ -27,7 +27,7 @@ If you have a Kafka system with 3 servers running, each running Kafka, then you 
 - A Kafka cluster is a group of one or more Kafka brokers that work together.
 - Brokers in a cluster share data and workload.
 - Topics and their partitions are distributed across brokers.
-- One broker acts as the controller, managing partition leadership and cluster metadata.
+- One broker acts as the MASTER, managing partition leadership and cluster metadata.
 - Kafka uses ZooKeeper (or KRaft in newer versions) to manage broker coordination.
 - The cluster ensures high availability, fault tolerance, and scalability.
 
@@ -36,7 +36,27 @@ Suppose producer is producing huge volume of data, then a single kafka broker ma
 <img width="1204" alt="image" src="https://github.com/user-attachments/assets/b219f408-b4db-4f8a-bb0e-46387832d00b" />
 
 #### Producer : 
-Publishes message to kafka topic. That topic can be lying over any broker in a kafka cluster.  Where does it publish message? is the message always going to same broker? is the message always going to same topic or partition? 
+A Kafka producer is a client that sends (publishes) data to Kafka topics.
+Producers are responsible for:
+- Choosing the topic to send the message to.
+- Optionally choosing the partition (or Kafka decides automatically).
+- Serializing the message.
+- Sending the message over the network to a Kafka broker.
+
+```
+producer.send(new ProducerRecord<>(<topic-name>, <partition-key>, <message>));
+```
+- If the partition-key is provided, Kafka will hash the key and map it to a partition. If no partition-key is provided, Kafka does a round-robin distribution across partitions.
+- A topic can have multiple partitions, and each partition is hosted on a different broker. So messages published to a topic might go to different brokers.
+
+
+🧠 Summary
+- What is a producer?	A client that sends messages to Kafka topics
+- Where does it publish?	To a topic, then routed to a partition on a broker
+- Always to same broker?	❌ No — it depends on the partition's location
+- Always to same topic?	❌ No — the producer can choose different topics
+- Always to same partition?	✅ If the key is fixed
+                            ❌ If no key is used
 
 #### Consumer : 
 Consumes messages from topics. From where do they consume? how do they know where to consume from?
