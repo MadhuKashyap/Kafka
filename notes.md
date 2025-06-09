@@ -16,7 +16,13 @@ All the publishing applications will publish data and receiving applications wil
 - Topic : Kafka topics are the categories used to organize messages. If the broker's setting for 'auto.create.topics.enable' is 'true' (default) then a new topic will be created whenever a consumer or a producer tries to read or write a topic that is not present on the cluster.
 - Partition : Partitions are fractions of a topic. They follow LIFO rule while processing the messages.
 - Broker : A Kafka broker is a server in the cluster this will receive and send the data.
+
+<img width="1279" alt="image" src="https://github.com/user-attachments/assets/657683b4-7932-4a8c-b962-bafb50611226" />
+
 - Cluster : Group of brokers working together. This is done to serve the purpose of scalability and availability(no single point of failure)
+
+<img width="1204" alt="image" src="https://github.com/user-attachments/assets/b219f408-b4db-4f8a-bb0e-46387832d00b" />
+
 - Consumer Group : Consumer groups work together and process events from a topic in parallel. 
 - Offset : The offset is a unique ID assigned to the partitions, which contains messages. 
 
