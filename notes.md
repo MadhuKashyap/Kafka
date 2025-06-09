@@ -43,7 +43,8 @@ Consumes messages from topics. From where do they consume? how do they know wher
 #### Topic : 
 Kafka topics are the categories used to organize messages. 
 
-```NOTE : If the broker's setting for 'auto.create.topics.enable' is 'true' (default) then a new topic will be created whenever a consumer or a producer tries to read or write a topic that is not present on the cluster. Same type of messages are pushed to 1 topic e.g. paymentinfo, orderData etc.
+```
+NOTE : If the broker's setting for 'auto.create.topics.enable' is 'true' (default) then a new topic will be created whenever a consumer or a producer tries to read or write a topic that is not present on the cluster. Same type of messages are pushed to 1 topic e.g. paymentinfo, orderData etc.
 ```
 #### Partition : 
 A partition is a physical subdivision of a topic. Every topic is split into one or more partitions. Why is a topic divided?
