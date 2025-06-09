@@ -11,20 +11,57 @@ All the publishing applications will publish data and receiving applications wil
 
 ### Important members of kafka
 
-- Producer : Publishes message to kafka cluster
-- Consumer : Consumes messages from topics
-- Topic : Kafka topics are the categories used to organize messages. If the broker's setting for 'auto.create.topics.enable' is 'true' (default) then a new topic will be created whenever a consumer or a producer tries to read or write a topic that is not present on the cluster.
-- Partition : Partitions are fractions of a topic. They follow LIFO rule while processing the messages.
-- Broker : A Kafka broker is a server in the cluster this will receive and send the data.
+#### Broker : 
+A Kafka broker is a single Kafka server. Its job is to:
+- Receive messages from producers.
+- Store them on disk (in partitions).
+- Serve consumers who want to read the messages.
+Each broker can handle hundreds or thousands of topics and millions of messages per second, depending on hardware and configuration.
+
+Example:
+If you have a Kafka system with 3 servers running, each running Kafka, then you have 3 brokers.
 
 <img width="1279" alt="image" src="https://github.com/user-attachments/assets/657683b4-7932-4a8c-b962-bafb50611226" />
 
-- Cluster : Group of brokers working together. This is done to serve the purpose of scalability and availability(no single point of failure)
+#### Cluster : 
+- A Kafka cluster is a group of one or more Kafka brokers that work together.
+- Brokers in a cluster share data and workload.
+- Topics and their partitions are distributed across brokers.
+- One broker acts as the controller, managing partition leadership and cluster metadata.
+- Kafka uses ZooKeeper (or KRaft in newer versions) to manage broker coordination.
+- The cluster ensures high availability, fault tolerance, and scalability.
+
+Suppose producer is producing huge volume of data, then a single kafka broker may not be able to handle the load. In that case               we need to add multiple brokers who can consume requests parallely to levarage scalability.
 
 <img width="1204" alt="image" src="https://github.com/user-attachments/assets/b219f408-b4db-4f8a-bb0e-46387832d00b" />
 
-- Consumer Group : Consumer groups work together and process events from a topic in parallel. 
-- Offset : The offset is a unique ID assigned to the partitions, which contains messages. 
+#### Producer : 
+Publishes message to kafka topic. That topic can be lying over any broker in a kafka cluster.  Where does it publish message? is the message always going to same broker? is the message always going to same topic or partition? 
+
+#### Consumer : 
+Consumes messages from topics. From where do they consume? how do they know where to consume from?
+#### Topic : 
+Kafka topics are the categories used to organize messages. 
+
+```NOTE : If the broker's setting for 'auto.create.topics.enable' is 'true' (default) then a new topic will be created whenever a consumer or a producer tries to read or write a topic that is not present on the cluster. Same type of messages are pushed to 1 topic e.g. paymentinfo, orderData etc.
+```
+#### Partition : 
+A partition is a physical subdivision of a topic. Every topic is split into one or more partitions. Why is a topic divided?
+Each partition:
+
+- Is an ordered, immutable sequence of records.
+- Stores data sequentially.
+- Is assigned to a broker (Kafka server) for load balancing.
+- Has its own offsets (a unique ID for each record within that partition).
+- They follow LIFO rule while processing the messages.
+- Replication is done at the partition level (each partition has replicas).
+- Each partition has 1 consumer out of a consumer group. Suppose there are n partitions of a topic. Each partition contain data of same category. So there will be 1 consumer group consisting of n consumers each reading from a different partition to enable parallel processing.
+
+#### Offset : 
+The offset is a unique ID assigned to the partitions, which contains messages. 
+
+#### Consumer Group : 
+Consumer groups work together and process events from a topic in parallel. 
 
 ### Important points to note
 
