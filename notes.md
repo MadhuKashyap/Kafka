@@ -59,7 +59,16 @@ producer.send(new ProducerRecord<>(<topic-name>, <partition-key>, <message>));
                             ❌ If no key is used
 
 #### Consumer : 
-Consumes messages from topics. From where do they consume? how do they know where to consume from?
+- A Kafka consumer is a client that reads messages from one or more Kafka topics.
+- Every message in a Kafka partition has a unique offset (like a position/index). The consumer keeps track of which offset it has read so it can resume where it left off.
+- Kafka ensures each partition is only read by one consumer in the group.
+- If we have 3 partitions and 2 consumers, 1 will sit idle until 1 more partition is added.
+- Consumers can subscribe to multiple topics at a time.
+
+```
+consumer.subscribe(Collections.singletonList("user-events"));
+```
+
 #### Topic : 
 Kafka topics are the categories used to organize messages. 
 
@@ -77,23 +86,20 @@ Each partition:
 - They follow LIFO rule while processing the messages.
 - Replication is done at the partition level (each partition has replicas).
 - Each partition has 1 consumer out of a consumer group. Suppose there are n partitions of a topic. Each partition contain data of same category. So there will be 1 consumer group consisting of n consumers each reading from a different partition to enable parallel processing.
+- One consumer in the group can consume more than one partition
+- Each partition has replicas on multiple brokers. So even if a broker fails, another broker with a replica can take over.
 
 #### Offset : 
-The offset is a unique ID assigned to the partitions, which contains messages. 
+An offset is a unique identifier for each message within a partition. It acts like a pointer or index, helping Kafka keep track of the position of messages.
+It is needed to maintain an index to check what all data has been read by the consumer. Suppose, consumer reads till offset 3 and goes down for some time, after it again becomes active we will have a record of what data has been consumed and what is left
 
 #### Consumer Group : 
-Consumer groups work together and process events from a topic in parallel. 
+- A group of consumers working together to read from a topic in parallel.
+- Kafka ensures each partition is only read by one consumer in the group.
+- This allows horizontal scaling of processing.
+- Just like 1 consumer is associated with 1 partition, 1 consumer group is associated with 1 topic.
 
-### Important points to note
 
-- each partition is consumed by exactly one consumer in the group
-- one consumer in the group can consume more than one partition
-- the number of consumer processes in a group must be <= number of partitions
-- Just like 1 consumer is associated with 1 partition, 1 consumer group is associated with 1 topic. If group has n consumers, and topic has m partitions where n > m, some consumers will sit idle and read nothing
-
-### What is a partition key?
-This is used to make consumers read from a particular partition. While calling Kafka.consume(topic, key) we can provide key and topic name to specify the topic and partition from which the consumer will read
-
-### Why do we need to maintain offset in partition?
-It is needed to maintain an index to check what all data has been read by the consumer. Suppose, consumer reads till offset 3 and goes down for some time, after it again becomes active we will have a record of what data has been consumed and what is left
+#### Summary
+<img width="503" alt="image" src="https://github.com/user-attachments/assets/aee0653c-9e47-468a-b16f-58bd9d5fa0cd" />
 
