@@ -151,4 +151,36 @@ Instead of deletion, offsets increase per consumer so that next time they do not
 kafka-server-start ~/desktop/kraft-server.properties
 Ctrl + C
 ```
+### Kafka server properties
+```
+# Required roles
+process.roles=broker,controller
+node.id=1
+controller.listener.names=CONTROLLER
+controller.quorum.voters=1@localhost:9093
 
+# Listeners
+listeners=PLAINTEXT://localhost:9092,CONTROLLER://localhost:9093
+listener.security.protocol.map=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+inter.broker.listener.name=PLAINTEXT
+
+# Log directory
+log.dirs=/tmp/kafka-logs
+```
+- listeners=PLAINTEXT://localhost:9092,CONTROLLER://localhost:9093 
+There are 2 types of communications in kafka, producer-consumer and within cluster-quorum. Client will exchange message in plaintext and on port 9092 and quorum members will communicate on 9093 about metadata info and quorum leader info.
+
+
+- process.roles=broker,controller : 
+The process.roles property tells Kafka what roles the current process (broker) should play. This node not only accept producer consumer messages but also participate in quorum communication. This can also possibly become the controller leader responsible for metadata updates.
+
+- node.id=1 : 
+assigns unique id to each broker
+
+- controller.listener.names=CONTROLLER
+
+Kafka starts a broker with two listeners: 1. PLAINTEXT on localhost:9092 → For producers, consumers, and inter-broker traffic
+2. CONTROLLER on localhost:9093 → For controller quorum (Raft) communication : Tells kafka “For controller communication, use the listener named CONTROLLER, which is bound to port 9093.”
+
+- controller.quorum.voters=1@localhost:9093
+Defines members in quorum. Here only 1 member
