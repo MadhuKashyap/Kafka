@@ -44,7 +44,13 @@ It refers to Kafka cluster’s current state and configuration. Cluster metadata
 - List of all topics available in the cluster.
 - Number of partitions for each topic.
 - The broker ID that is the leader for each partition. Clients always send writes or reads to the partition leader.
-- The broker acting as the Kafka controller that manages cluster metadata updates, partition assignments, and leader elections.
+- The broker acting as the Kafka controller manages cluster metadata updates, partition assignments, and leader elections.
+
+### Controller Quorum
+- A controller quorum is set of nodes (called controller voters) that collectively manage cluster metadata.
+- Multiple brokers together form a quorum. It is made up of multiple brokers to provide high availability and fault tolerance.
+- However, at any given time, exactly one of these controllers acts as the “active leader controller”
+- The other controllers in the quorum are standby controllers waiting to take over if the leader fails.
 
 #### Producer : 
 A Kafka producer is a client that sends (publishes) data to Kafka topics.
