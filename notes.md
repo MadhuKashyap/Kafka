@@ -131,7 +131,7 @@ Instead of deletion, offsets increase per consumer so that next time they do not
     - What topics exist.
     - Where partitions are located.
     - Which broker is the leader for each partition.
-  Coordination between brokers, like:
+- Coordination between brokers, like:
     - Electing a controller broker.
     - Handling broker failures.
 
