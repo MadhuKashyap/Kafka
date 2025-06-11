@@ -184,3 +184,18 @@ Kafka starts a broker with two listeners: 1. PLAINTEXT on localhost:9092 → For
 
 - controller.quorum.voters=1@localhost:9093
 Defines members in quorum. Here only 1 member
+
+### Common kafka commands
+1. start kafka
+```
+kafka-server-start ~/desktop/kraft-server.properties
+```
+2. stop kafka
+```
+Ctrl + C
+```
+3. list all topics on kafka : ```
+kafka-topics --list --bootstrap-server localhost:9092
+```
+4. 
+
