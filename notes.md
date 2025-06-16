@@ -194,8 +194,15 @@ kafka-server-start ~/desktop/kraft-server.properties
 ```
 Ctrl + C
 ```
-3. list all topics on kafka : ```
+3. list all topics on kafka : 
+```
 kafka-topics --list --bootstrap-server localhost:9092
 ```
-4. 
+4. Error : java.lang.RuntimeException: No readable meta.properties files found while starting server
+
+Run below command and then start server
+```
+kafka-storage format -t $(kafka-storage random-uuid) -c ~/Desktop/kraft-server.properties
+```
+
 
