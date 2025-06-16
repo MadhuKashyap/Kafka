@@ -145,6 +145,10 @@ Instead of deletion, offsets increase per consumer so that next time they do not
 #### Summary
 <img width="503" alt="image" src="https://github.com/user-attachments/assets/aee0653c-9e47-468a-b16f-58bd9d5fa0cd" />
 
+### __consumer_offset
+
+Internal topic where Kafka stores offsets that tracks how much of a topic's data a consumer has read.
+
 
 ### Starting and stoping kafka server
 ```
