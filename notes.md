@@ -328,3 +328,12 @@ check the containers active
 ```
 docker ps
 ```
+To execute any kafka command, now we have to enter the container's shell
+```
+docker exec -it kafka-kraft bash
+[root@993f04b65d89 appuser]# kafka-topics --create \
+>   --topic test-topic \
+>   --bootstrap-server localhost:9092 \
+>   --partitions 1 \
+>   --replication-factor 1
+```
