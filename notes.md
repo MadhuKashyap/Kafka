@@ -208,5 +208,123 @@ Run below command and then start server
 ```
 kafka-storage format -t $(kafka-storage random-uuid) -c ~/Desktop/kraft-server.properties
 ```
+### Kafka setup in windows
 
+Create 2 files inside a folder kafka-kraft-docker
+1. docker-compose.yml
+```
+version: '3.8'
 
+services:
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka-kraft
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    user: root
+    command: >
+      bash -c "
+        kafka-storage format --ignore-formatted --cluster-id=$$(kafka-storage random-uuid) --config /etc/kafka/kraft-server.properties &&
+        kafka-server-start /etc/kafka/kraft-server.properties
+      "
+    volumes:
+      - ./kraft-server.properties:/etc/kafka/kraft-server.properties
+      - kraft-data:/tmp/kraft-combined-logs
+
+  kafdrop:
+    image: obsidiandynamics/kafdrop
+    container_name: kafdrop
+    restart: always
+    ports:
+      - "9000:9000"
+    environment:
+      KAFKA_BROKERCONNECT: kafka-kraft:9092
+    depends_on:
+      - kafka
+
+volumes:
+  kraft-data:
+```
+2. kraft-server.properties
+```
+process.roles=broker,controller
+node.id=1
+controller.quorum.voters=1@kafka-kraft:9093
+
+listeners=PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+advertised.listeners=PLAINTEXT://kafka-kraft:9092
+listener.security.protocol.map=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+controller.listener.names=CONTROLLER
+
+log.dirs=/tmp/kraft-combined-logs
+auto.create.topics.enable=true
+num.network.threads=3
+num.io.threads=8
+socket.send.buffer.bytes=102400
+socket.receive.buffer.bytes=102400
+socket.request.max.bytes=104857600
+log.retention.hours=168
+log.segment.bytes=1073741824
+log.retention.check.interval.ms=300000
+num.partitions=1
+offsets.topic.replication.factor=1
+transaction.state.log.replication.factor=1
+transaction.state.log.min.isr=1
+group.initial.rebalance.delay.ms=0
+```
+
+How does kafka and kafdrop start in containers using these files
+
+```
+kafka:
+    image: confluentinc/cp-kafka:7.5.0
+```
+- This pulls the official Kafka Docker image with KRaft support.
+- Kafka is running in KRaft mode (self-managed metadata, no ZooKeeper).
+- KRaft config is passed using a custom config file (kraft-server.properties).
+
+```
+kafka-storage format --ignore-formatted --cluster-id=$(kafka-storage random-uuid)
+```
+This initializes Kafka storage with a random UUID. Required for KRaft mode to work.
+
+```
+kafka-server-start /etc/kafka/kraft-server.properties
+```
+Starts the Kafka server using your custom KRaft configuration.
+
+```
+volumes:
+  - ./kraft-server.properties:/etc/kafka/kraft-server.properties
+  - kraft-data:/tmp/kraft-combined-logs
+```
+
+Uses a named volume for persistent logs.
+
+```
+user: root
+```
+Needed so Kafka can write to /tmp/kraft-combined-logs on Windows (avoids permission issues).
+
+```
+  kafdrop:
+    image: obsidiandynamics/kafdrop
+```
+pulls Kafdrop image
+
+```
+environment:
+  KAFKA_BROKERCONNECT: kafka-kraft:9092
+```
+kafdrop connects to kafka using this
+
+Run this yml file using this command
+```
+D:\kafka-kraft-docker>docker-compose up -d
+```
+
+check the containers active
+```
+docker ps
+```
