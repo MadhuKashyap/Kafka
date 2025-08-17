@@ -337,3 +337,78 @@ docker exec -it kafka-kraft bash
 >   --partitions 1 \
 >   --replication-factor 1
 ```
+### What is the role of the replication factor? How does Kafka ensure durability and availability?
+Every Kafka topic is split into partitions.Each partition is stored on multiple brokers (servers) — this number is the replication factor.
+Example: replication factor = 3 → each partition has 1 leader + 2 followers.
+
+### How does kafka ensure message durability ?
+Kafka can be configured with acks to ensure messages are written properly. When a message is written, 
+
+acks=1 → leader writes to its log and acknowledges (fast, less safe).
+acks=all → leader waits until all in-sync replicas (ISR) write the message before acking (slower, very safe). This guarantees data isn’t lost even if one broker crashes.
+
+### How does kafka ensure availability?
+If the leader broker for a partition fails:
+
+One of the in-sync follower replicas is elected as the new leader.Producers and consumers automatically switch to the new leader.This keeps the system running without downtime. Kafka only promotes an ISR(In-sync replica) follower to leader — ensuring no data loss during failover.
+
+### How does consumer offset management work?
+- Offsets are stored in a special internal topic called __consumer_offsets.
+- Each record in __consumer_offsets is essentially a key-value pair.
+      - Key : consumer_group + topic + partition
+      - Value : which offset to be set next for this partition
+
+- Offsets are not tracked per consumer but per consumer group.
+- If current read offsets are not commited, then after system failure, consumer will start consuming from last committed offset.
+  
+### How does Kafka ensure ordering of messages? In what scenarios can ordering be lost?
+Within a Partition : 
+- Kafka appends messages sequentially to a partition’s log.
+- Each message gets a monotonically increasing offset.
+
+Outside of partition : 
+- Kafka gives no guarantee to message ordering across partition, because message 1 can be (n + 10 )th message in partition 0 and ,essage 2 can be nth message in partition 1.
+- So accross partitions, consumer group might process M1 before M1
+
+### Explain the difference between ZooKeeper-based Kafka and KRaft (Kafka Raft mode)?
+Zookeeper :
+- used in leader selection
+-  metadata management.
+-  bottleneck while scaling on large clusters
+
+KRaft :
+- A set of brokers run as controllers.
+- Controllers use Raft consensus to agree on cluster metadata and leader election
+
+### When does a consumer group rebalance?
+1. a new consumer joins the group
+2. consumer leaves the group
+3. new partition is created
+
+### What happens in consumer group rebalance?
+- All consumers in the group stop consuming messages temporarily.
+- consumers commit offset and revoke their partitions
+- Group Coordinator runs a partition assignment strategy (e.g., Range, RoundRobin, Sticky).
+- Assigns partitions to consumers so each partition has exactly one owner.
+
+### How do you decide the number of partitions for a topic? What trade-offs are involved?
+More partitions = More parallelism = More throughput
+But also <br/>
+More partitions = more replicas = more metadata stored in ZooKeeper/KRaft
+
+| Factor               | Fewer Partitions                                      | More Partitions                                                   |
+|-----------------------|-------------------------------------------------------|-------------------------------------------------------------------|
+| **Throughput (parallelism)** | Limited by partition count                           | Higher throughput (more consumers in parallel)                    |
+| **Ordering Guarantees**      | Easier (fewer partitions to manage order per key)   | Still ordered per partition, but global order harder              |
+| **Latency**                  | Less overhead                                      | Higher overhead in coordination & replication                     |
+| **Cluster Overhead**         | Lower metadata, faster rebalance                   | Higher metadata load, slower rebalances                           |
+| **Scalability**              | Hard to add consumers beyond partition count       | Scales better (but diminishing returns after a point)             |
+| **Operational Cost**         | Lightweight                                        | Too many partitions = stress on controller, memory, and network   |
+
+Start with a reasonable guess: e.g.,
+
+1 partition per expected consumer thread,
+
+or 2–3 × number of brokers.
+
+Use Kafka’s partition reassignment tool to add partitions as needed later
