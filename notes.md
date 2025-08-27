@@ -412,3 +412,40 @@ Start with a reasonable guess: e.g.,
 or 2–3 × number of brokers.
 
 Use Kafka’s partition reassignment tool to add partitions as needed later
+
+### Difference between kafka and rabbitMQ.
+# RabbitMQ vs Kafka
+
+| Feature                 | **RabbitMQ**                                                                 | **Kafka**                                                                             |
+| ----------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| **Type**                | Traditional **message broker** (message queue).                              | **Distributed event streaming platform** (log-based).                                 |
+| **Message Model**       | **Push-based** – broker pushes messages to consumers.                        | **Pull-based** – consumers poll and read at their own pace.                           |
+| **Use Case**            | Short-lived tasks, job queues, request-response, event-driven communication. | Event streaming, real-time analytics, log aggregation, data pipelines.                |
+| **Message Storage**     | Message is deleted once consumed (unless persisted manually).                | Messages are persisted (default: 7 days or longer) and can be re-read multiple times. |
+| **Throughput**          | Lower (10s–100s of thousands msgs/sec).                                      | Very high (millions msgs/sec).                                                        |
+| **Ordering**            | Per-queue ordering guaranteed.                                               | Per-partition ordering guaranteed.                                                    |
+| **Delivery Guarantees** | At-most-once, At-least-once, Exactly-once (with plugins).                    | At-least-once, Exactly-once (built-in).                                               |
+| **Scalability**         | Good, but limited by broker architecture.                                    | Excellent – designed for distributed scale-out.                                       |
+| **Latency**             | Very low (ms-level).                                                         | Low, but tuned more for **throughput** than single-digit latency.                     |
+| **Durability**          | Optional (messages can be transient).                                        | Persistent by default (append-only log on disk).                                      |
+| **Consumer Model**      | Competing consumers (queue distributes msgs across consumers).               | Pub-sub (many consumers can read the same stream independently).                      |
+| **Maturity**            | Very mature, battle-tested (2007).                                           | Newer but highly popular (2011, by LinkedIn).                                         |
+### Why is kafka throughput high while rabbit's is slow?
+RabbitMQ throughput is lower because it pushes messages, deletes them after consumption, and the broker does more work (tracking acks, retries, queues).
+Kafka throughput is higher because it just writes messages in a log (append-only), keeps them for a set time, and consumers pull at their own pace.
+
+### what is At-most-once, At-least-once, Exactly-once delivery guarantee and how rabbit-mq and kafka implement it?
+- At-most-once: Message may be lost, but never duplicated.
+
+- At-least-once: Message is never lost, but may be duplicated.
+
+- Exactly-once: Message is delivered once and only once, no loss, no duplication.
+
+#### Rabbit : 
+1. At most once : - consumer has set auto-ack: on, so the messages are always acknowledged iven if it crashes.
+2. At least once : auto-ack : off, if consumer fails before reading, it is retried with dlq support.
+
+#### Kafka : 
+1. At-most-once : If consumer commits offset before processing the message.
+2. At least once : Consumer commits offset after processing. if crash happens after reading but commiting offset, messages can be duplicated
+3. Exactly once : using transactional writes. Producer and consumer work under same transaction, so if anything fails, it is reverted.
