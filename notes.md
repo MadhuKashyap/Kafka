@@ -341,11 +341,21 @@ docker exec -it kafka-kraft bash
 Every Kafka topic is split into partitions.Each partition is stored on multiple brokers (servers) — this number is the replication factor.
 Example: replication factor = 3 → each partition has 1 leader + 2 followers.
 
-### How does kafka ensure message durability ?
-Kafka can be configured with acks to ensure messages are written properly. When a message is written, 
+### How does kafka ensure message durability while publishing ?
+Kafka can be configured with acks to ensure messages are written properly. When a producer sends a message, the broker replies with an acknowledgment (ack).
+1. acks=0 :
+     - Producer does not wait for any broker ack.
+     - Fire-and-forget: fastest, but you may lose messages if broker/network fails.
+2. ack = 1 :
+     - Producer waits for leader broker only to write the message to its local log.
+     - Followers may not have replicated it yet.
+3. ack = all
+     - leader waits until all in-sync replicas (ISR) write the message before acking (slower, very safe). This guarantees data isn’t lost even if one broker crashes.
 
-acks=1 → leader writes to its log and acknowledges (fast, less safe).
-acks=all → leader waits until all in-sync replicas (ISR) write the message before acking (slower, very safe). This guarantees data isn’t lost even if one broker crashes.
+### How does kafka ensure message durability while consuming ?
+Suppose consumer reads a buggy message that throws an exception
+case 1 : Offset committed before-hand : message is lost and silent failed<br/>
+case 2 : Offset is not committed and message is read again. Thi smeans consumer keeps retrying this again n again. Im this scenario, Instead of re-consuming endlessly, consumer sends it to a retry topic, another consumer consumes from here and retries N times to push to the partition exponentially, if it fails indefinitely, it is marked permanent_lost;
 
 ### How does kafka ensure availability?
 If the leader broker for a partition fails:
